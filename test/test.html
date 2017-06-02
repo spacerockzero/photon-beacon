@@ -7,8 +7,26 @@
   </head>
   <body>
     <a href="test.html">GOTO 0</a>
-    <a href="test2.html">GOTO 2</a>
-    <script src="../node_modules/usertiming-compression/src/usertiming-compression.js"></script>
-    <script src="../src/hayaku-beacon.js"></script>
+    <!--<a href="test2.html">GOTO 2</a>-->
+    <script>
+      performance.mark('test1');
+      window.setTimeout(function(){
+        performance.mark('test2');
+        performance.measure('measure1', 'test1', 'test2');
+      }, 500)
+    </script>
+    <!--<script src="../node_modules/usertiming-compression/src/usertiming-compression.js"></script>-->
+    <script>
+      window.HAYAKU_CONFIG = {
+        URL: '/notlog',
+        compressed: true
+      }
+      document.addEventListener('hayakuLoaded', function() {
+        HAYAKU.addData('foo', {'bar': false});
+        HAYAKU.getData();
+        HAYAKU.send(true);
+      });
+    </script>
+    <script src="../src/hayaku-beacon.js" async></script>
   </body>
 </html>

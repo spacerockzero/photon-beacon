@@ -1,59 +1,91 @@
-performance.mark('test1');
-performance.mark('test2');
-performance.measure('measure1', 'test1', 'test2');
-// var entries = performance.getEntries();
-// console.log('entries', entries);
-// var marks = performance.getEntriesByType('mark');
-// console.log('marks', marks);
-// var measures = performance.getEntriesByType('measure');
-// console.log('measures', measures);
-// // not supported by polyfill, firefox, or safari
-// var navigation = performance.getEntriesByType('navigation');
-// console.log('navigation', navigation);
-// // not supported by polyfill or safari
-// var resources = performance.getEntriesByType('resource');
-// console.log('resources', resources);
+(function(window, document){
 
-(function(window){
+  // HAYAKU BEACON
+  // A lighter, faster, more native performance timing beacon
+  // --------------------------------------------------------------------------------
 
-  // config
-  const performanceData = {};
+  // REQUIREMENTS:
+  // - user timing api support or polyfill
+  // - fetch api support or polyfill
+  // --------------------------------------------------------------------------------
 
-  // // gather entries
-  // const entries = window.performance.getEntries();
+  window.HAYAKU = {
 
-  // gather marks
-  performanceData.marks = window.performance.getEntriesByType('mark');
+    // CONFIG
+    // --------------------------------------------------------------------------------
+    defaultConfig: {
+      URL: '/log',
+      compressed: false
+    },
 
-  // gather measures
-  performanceData.measures = window.performance.getEntriesByType('measure');
 
-  // gather navigation
-  performanceData.navigations = window.performance.navigation;
+    // HOIST DATA
+    // --------------------------------------------------------------------------------
 
-  // gather timing
-  performanceData.timings = window.performance.timing;
+    data: {},
 
-  // gather resources
-  performanceData.resources = window.performance.getEntriesByType('resource');
 
-  // send as beacon / on fallback event
-  console.log('performanceData:', performanceData);
-  // console.log('performanceData:', JSON.stringify(performanceData));
+    // GATHER DATA
+    // --------------------------------------------------------------------------------
 
-  window.addEventListener('unload', logData, false);
+    gather: function() {
+      const data = {};
+      // gather marks
+      data.marks = window.performance.getEntriesByType('mark');
+      // gather measures
+      data.measures = window.performance.getEntriesByType('measure');
+      // gather navigation
+      data.navigations = window.performance.navigation;
+      // gather timing
+      data.timings = window.performance.timing;
+      // gather resources
+      data.resources = window.performance.getEntriesByType('resource');
+      return data;
+    },
 
-  function logData() {
-    if (window.navigator.sendBeacon) {
-      window.navigator.sendBeacon("/log", performanceData);
-    } else {
-      var data = new FormData();
-      data.append('json', json.stringify(performanceData));
-      window.fetch('/log', {
-        method: 'POST',
-        body: data
-      });
+    // SEND BEACON
+    // ------------------------------------------------------------------------
+
+    // send as beacon / on fallback event
+    send: function(isLazy) {
+      const data = new FormData();
+      data.append('json', JSON.stringify(window.HAYAKU.data));
+      console.log('data.get(json):', data.get('json'));
+
+      if (window.navigator.sendBeacon && isLazy) {
+        window.navigator.sendBeacon(window.HAYAKU.config.URL, data);
+      } else {
+        // consider swapping this for an img beacon if it blocks at all?
+        window.fetch(window.HAYAKU.config.URL, {
+          method: 'POST',
+          body: data
+        });
+      }
     }
+
+  };
+
+
+  // ADDITIONAL SELF-REFERENCING METHODS
+  // --------------------------------------------------------------------------------
+
+  window.HAYAKU.getData = function() {
+    // if object already exists, merge new data in without overwriting existing values
+    window.HAYAKU.data = window.HAYAKU.data
+      ? Object.assign(window.HAYAKU.gather(), window.HAYAKU.data)
+      : window.HAYAKU.gather();
   }
 
-})(window);
+  window.HAYAKU.addData = function(key, value) {
+    window.HAYAKU.data[key] = value;
+  }
+
+  window.HAYAKU.config = (window.HAYAKU && window.HAYAKU_CONFIG)
+    ? Object.assign(window.HAYAKU.defaultConfig, window.HAYAKU_CONFIG)
+    : window.HAYAKU.defaultConfig
+
+  // emit loaded event
+  const loadedEvent = new CustomEvent('hayakuLoaded');
+  document.dispatchEvent(loadedEvent);
+
+})(window, document);
