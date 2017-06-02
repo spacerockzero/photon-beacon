@@ -1,0 +1,16 @@
+{
+  "name": "hayaku-beacon",
+  "version": "1.0.0",
+  "description": "A faster, lighter, more native performance timing beacon",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jakob Anderson <@spacerockzero>",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^0.10.0",
+    "usertiming-compression": "^0.1.4"
+  }
+}
