@@ -17,8 +17,10 @@ gulp.task('babel', () => {
     .pipe(gulp.dest(dest));
 });
 
-gulp.watch(src, ['babel'], (e) => {
-  console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
-});
+gulp.task('watch', ['babel'], () => {
+  gulp.watch(src, ['babel'], (e) => {
+    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+  });
+})
 
 gulp.task('default', ['babel']);
