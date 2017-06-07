@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <a href="test.html">GOTO 0</a>
+    <a href="https://google.com">GOTO google</a>
     <!--<a href="test2.html">GOTO 2</a>-->
     <script>
       performance.mark('test1');
@@ -18,12 +18,12 @@
     <!--<script src="../node_modules/usertiming-compression/src/usertiming-compression.js"></script>-->
     <script>
       window.HAYAKU_CONFIG = {
-        URL: '/notlog',
-        compressed: true
+        URL: 'http://localhost:5000/beacon-lite'
       }
-      document.addEventListener('hayakuLoaded', function() {
+      // gather and send on unload, as user leaves page
+      window.addEventListener('unload', () => {
+        HAYAKU.getData(); // gather late, to gather without impacting user
         HAYAKU.addData('foo', {'bar': false});
-        HAYAKU.getData();
         HAYAKU.send(true);
       });
     </script>

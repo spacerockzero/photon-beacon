@@ -48,18 +48,13 @@
 
     // send as beacon / on fallback event
     send: function(isLazy) {
-      const data = new FormData();
-      data.append('json', JSON.stringify(window.HAYAKU.data));
-      console.log('data.get(json):', data.get('json'));
-
+      const data = window.HAYAKU.data
+      const headers = {
+        type: 'application/json'
+      };
+      const blob = new Blob([JSON.stringify(data)], headers);
       if (window.navigator.sendBeacon && isLazy) {
-        window.navigator.sendBeacon(window.HAYAKU.config.URL, data);
-      } else {
-        // consider swapping this for an img beacon if it blocks at all?
-        window.fetch(window.HAYAKU.config.URL, {
-          method: 'POST',
-          body: data
-        });
+        window.navigator.sendBeacon(window.HAYAKU.config.URL, blob);
       }
     }
 
