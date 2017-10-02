@@ -15,18 +15,18 @@
         performance.measure('measure1', 'test1', 'test2');
       }, 500)
     </script>
-    <!--<script src="../node_modules/usertiming-compression/src/usertiming-compression.js"></script>-->
+    <script src="../node_modules/usertiming-compression/src/usertiming-compression.js"></script>
     <script>
-      window.HAYAKU_CONFIG = {
+      window.PHOTON_CONFIG = {
         URL: 'http://localhost:3000/beacon'
       }
       // gather and send on unload, as user leaves page
       window.addEventListener('unload', () => {
-        HAYAKU.getData(); // gather late, to gather without impacting user
-        HAYAKU.addData('foo', {'bar': false});
-        HAYAKU.send(); // sends beacon, if supported
+        PHOTON.getData(); // gather late, to gather without impacting user
+        PHOTON.addData('foo', {'bar': false});
+        PHOTON.send(); // sends beacon, if supported
       });
     </script>
-    <script src="../dist/hayaku-beacon.min.js" async></script>
+    <script src="../dist/photon-beacon.min.js" async></script>
   </body>
 </html>
