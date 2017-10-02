@@ -1,7 +1,8 @@
 (function(window, document){
 
-  // HAYAKU BEACON
-  // A lighter, faster, more native performance timing beacon
+  // PHOTON BEACON
+  // A performance timing beacon that's traveling light
+  // Native-API first to keep things light & minimal
   // --------------------------------------------------------------------------------
 
   // REQUIREMENTS:
@@ -9,7 +10,7 @@
   // - fetch api support or polyfill
   // --------------------------------------------------------------------------------
 
-  const HAYAKU = {
+  const PHOTON = {
 
     // CONFIG
     // --------------------------------------------------------------------------------
@@ -48,14 +49,16 @@
 
     // send as beacon / on fallback event
     send: function() {
-      const data = window.HAYAKU.data
+      const data = window.PHOTON.data || {};
       const headers = {
         type: 'application/json'
       };
-      const blob = new Blob([JSON.stringify(data)], headers);
+      // const blob = new Blob([JSON.stringify(data, null, 2)], headers);
+      const payload = JSON.stringify(data, null, 2);
       if (window.navigator.sendBeacon) {
-        // Chrome 59 breaks blobs in sendBeacon. Need fix.
-        window.navigator.sendBeacon(window.HAYAKU.config.URL, blob);
+        // Chrome 60 breaks blobs in sendBeacon. Need fix.
+        // Firefox still works
+        window.navigator.sendBeacon(window.PHOTON.config.URL, payload);
       }
     }
 
@@ -65,26 +68,26 @@
   // ADDITIONAL SELF-REFERENCING METHODS
   // --------------------------------------------------------------------------------
 
-  HAYAKU.getData = function() {
+  PHOTON.getData = function() {
     // if object already exists, merge new data in without overwriting existing values
-    HAYAKU.data = HAYAKU.data
-      ? Object.assign(HAYAKU.gather(), HAYAKU.data)
-      : HAYAKU.gather();
+    PHOTON.data = PHOTON.data
+      ? Object.assign(PHOTON.gather(), PHOTON.data)
+      : PHOTON.gather();
   }
 
-  HAYAKU.addData = function(key, value) {
-    HAYAKU.data[key] = value;
+  PHOTON.addData = function(key, value) {
+    PHOTON.data[key] = value;
   }
 
-  HAYAKU.config = (HAYAKU && HAYAKU_CONFIG)
-    ? Object.assign(HAYAKU.defaultConfig, HAYAKU_CONFIG)
-    : HAYAKU.defaultConfig
+  PHOTON.config = (PHOTON && PHOTON_CONFIG)
+    ? Object.assign(PHOTON.defaultConfig, PHOTON_CONFIG)
+    : PHOTON.defaultConfig
 
   // assign to window
-  window.HAYAKU = HAYAKU;
+  window.PHOTON = PHOTON;
 
   // emit loaded event
-  const loadedEvent = new CustomEvent('hayakuLoaded');
+  const loadedEvent = new CustomEvent('PHOTONLoaded');
   document.dispatchEvent(loadedEvent);
 
 })(window, document);
