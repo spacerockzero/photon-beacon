@@ -9,7 +9,7 @@
   // - fetch api support or polyfill
   // --------------------------------------------------------------------------------
 
-  window.HAYAKU = {
+  const HAYAKU = {
 
     // CONFIG
     // --------------------------------------------------------------------------------
@@ -47,13 +47,14 @@
     // ------------------------------------------------------------------------
 
     // send as beacon / on fallback event
-    send: function(isLazy) {
+    send: function() {
       const data = window.HAYAKU.data
       const headers = {
         type: 'application/json'
       };
       const blob = new Blob([JSON.stringify(data)], headers);
-      if (window.navigator.sendBeacon && isLazy) {
+      if (window.navigator.sendBeacon) {
+        // Chrome 59 breaks blobs in sendBeacon. Need fix.
         window.navigator.sendBeacon(window.HAYAKU.config.URL, blob);
       }
     }
@@ -64,20 +65,23 @@
   // ADDITIONAL SELF-REFERENCING METHODS
   // --------------------------------------------------------------------------------
 
-  window.HAYAKU.getData = function() {
+  HAYAKU.getData = function() {
     // if object already exists, merge new data in without overwriting existing values
-    window.HAYAKU.data = window.HAYAKU.data
-      ? Object.assign(window.HAYAKU.gather(), window.HAYAKU.data)
-      : window.HAYAKU.gather();
+    HAYAKU.data = HAYAKU.data
+      ? Object.assign(HAYAKU.gather(), HAYAKU.data)
+      : HAYAKU.gather();
   }
 
-  window.HAYAKU.addData = function(key, value) {
-    window.HAYAKU.data[key] = value;
+  HAYAKU.addData = function(key, value) {
+    HAYAKU.data[key] = value;
   }
 
-  window.HAYAKU.config = (window.HAYAKU && window.HAYAKU_CONFIG)
-    ? Object.assign(window.HAYAKU.defaultConfig, window.HAYAKU_CONFIG)
-    : window.HAYAKU.defaultConfig
+  HAYAKU.config = (HAYAKU && HAYAKU_CONFIG)
+    ? Object.assign(HAYAKU.defaultConfig, HAYAKU_CONFIG)
+    : HAYAKU.defaultConfig
+
+  // assign to window
+  window.HAYAKU = HAYAKU;
 
   // emit loaded event
   const loadedEvent = new CustomEvent('hayakuLoaded');

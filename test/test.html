@@ -18,15 +18,15 @@
     <!--<script src="../node_modules/usertiming-compression/src/usertiming-compression.js"></script>-->
     <script>
       window.HAYAKU_CONFIG = {
-        URL: 'http://localhost:5000/beacon-lite'
+        URL: 'http://localhost:3000/beacon'
       }
       // gather and send on unload, as user leaves page
       window.addEventListener('unload', () => {
         HAYAKU.getData(); // gather late, to gather without impacting user
         HAYAKU.addData('foo', {'bar': false});
-        HAYAKU.send(true);
+        HAYAKU.send(); // sends beacon, if supported
       });
     </script>
-    <script src="../src/hayaku-beacon.js" async></script>
+    <script src="../dist/hayaku-beacon.min.js" async></script>
   </body>
 </html>
