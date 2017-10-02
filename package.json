@@ -2,9 +2,10 @@
   "name": "hayaku-beacon",
   "version": "1.0.0",
   "description": "A faster, lighter, more native performance timing beacon",
-  "main": "index.js",
+  "main": "./dist.hayaku-beacon.min.js",
   "scripts": {
-    "start": "http-server",
+    "start": "./node_modules/.bin/http-server && ./node_modules/.bin/gulp watch",
+    "precommit": "./node_modules/.bin/gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jakob Anderson <@spacerockzero>",
@@ -12,5 +13,13 @@
   "dependencies": {
     "http-server": "^0.10.0",
     "usertiming-compression": "^0.1.4"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.5.2",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^3.0.0",
+    "husky": "^0.13.4"
   }
 }
