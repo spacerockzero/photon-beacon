@@ -1,8 +1,8 @@
 {
-  "name": "hayaku-beacon",
+  "name": "photon-beacon",
   "version": "1.0.0",
-  "description": "A faster, lighter, more native performance timing beacon",
-  "main": "./dist.hayaku-beacon.min.js",
+  "description": "A performance timing beacon that's traveling light.",
+  "main": "./dist/photon-beacon.min.js",
   "scripts": {
     "start": "./node_modules/.bin/http-server && ./node_modules/.bin/gulp watch",
     "precommit": "./node_modules/.bin/gulp",
