@@ -64,9 +64,9 @@
           LZString: true,
           data: LZString.compressToEncodedURIComponent(JSON.stringify(data))
         }
-        console.log('after zip length:', JSON.stringify(data).length)
       }
       console.log('data:', data)
+      console.log('final beacon length:', JSON.stringify(data).length)
 
       return data
     },
@@ -78,14 +78,19 @@
     send () {
       const data = window.PHOTON.data || {}
       if (window.navigator.sendBeacon) {
-        // Firefox still works
-        const blob = new window.Blob([JSON.stringify(data, null, 2)], {
-          type: 'application/json'
-        })
-        window.navigator.sendBeacon(window.PHOTON.config.URL, blob)
-        // Chrome 60 breaks blob headers in sendBeacon. Need fix. plaintext still works in chrome
-        // const payload = JSON.stringify(data, null, 2);
-        // window.navigator.sendBeacon(window.PHOTON.config.URL, payload);
+        // eww until chrome fixes sendBeacon bug
+        const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
+        if (isChrome) {
+          // Chrome 60 breaks blob headers in sendBeacon. Need fix. plaintext still works in chrome
+          const payload = JSON.stringify(data, null, 2)
+          window.navigator.sendBeacon(window.PHOTON.config.URL, payload)
+        } else {
+          // Firefox still works
+          const blob = new window.Blob([JSON.stringify(data, null, 2)], {
+            type: 'application/json'
+          })
+          window.navigator.sendBeacon(window.PHOTON.config.URL, blob)
+        }
       } else {
         // use fetch? will cancel on navigation unless in web worker
       }
