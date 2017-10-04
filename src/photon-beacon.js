@@ -1,5 +1,4 @@
-(function(window, document){
-
+(function (window, document, UserTimingCompression, ResourceTimingCompression, performance, LZString) {
   // PHOTON BEACON
   // A performance timing beacon that's traveling light
   // Native-API first to keep things light & minimal
@@ -15,79 +14,108 @@
     // CONFIG
     // --------------------------------------------------------------------------------
     defaultConfig: {
-      URL: '/log',
-      compressed: false
+      URL: '/beacon'
     },
-
 
     // HOIST DATA
     // --------------------------------------------------------------------------------
 
     data: {},
 
-
     // GATHER DATA
     // --------------------------------------------------------------------------------
 
-    gather: function() {
-      const data = {};
-      // gather marks
-      data.marks = window.performance.getEntriesByType('mark');
-      // gather measures
-      data.measures = window.performance.getEntriesByType('measure');
-      // gather navigation
-      data.navigations = window.performance.navigation;
+    gather () {
+      let data = {}
+
+      // if (UserTimingCompression) PHOTON.defaultConfig.utCompress = true
+      // if (ResourceTimingCompression) PHOTON.defaultConfig.rtCompress = true
+
       // gather timing
-      data.timings = window.performance.timing;
+      if (UserTimingCompression) {
+        data.userTimingsCompressed = UserTimingCompression.compressForUri(UserTimingCompression.getCompressedUserTiming())
+        // debugger
+      } else {
+        // gather marks
+        data.marks = performance.getEntriesByType('mark')
+        // gather measures
+        data.measures = performance.getEntriesByType('measure')
+      }
+
+      // gather timings
+      data.timings = performance.timing
+
+      // first paint
+      if (window.chrome) {
+        data.firstPaint = window.chrome.loadTimes().firstPaintTime
+      } else {
+        // TODO: IE has something but needs a conversion
+      }
+
       // gather resources
-      data.resources = window.performance.getEntriesByType('resource');
-      return data;
+      if (ResourceTimingCompression) {
+        data.resourcesCompressed = ResourceTimingCompression.getResourceTiming()
+      } else {
+        data.resources = performance.getEntriesByType('resource')
+      }
+      if (LZString) {
+        console.log('before zip length:', JSON.stringify(data).length)
+        data = {
+          LZString: true,
+          data: LZString.compressToEncodedURIComponent(JSON.stringify(data))
+        }
+        console.log('after zip length:', JSON.stringify(data).length)
+      }
+      console.log('data:', data)
+
+      return data
     },
 
     // SEND BEACON
     // ------------------------------------------------------------------------
 
     // send as beacon / on fallback event
-    send: function() {
-      const data = window.PHOTON.data || {};
-      const headers = {
-        type: 'application/json'
-      };
-      // const blob = new Blob([JSON.stringify(data, null, 2)], headers);
-      const payload = JSON.stringify(data, null, 2);
+    send () {
+      const data = window.PHOTON.data || {}
       if (window.navigator.sendBeacon) {
-        // Chrome 60 breaks blobs in sendBeacon. Need fix.
         // Firefox still works
-        window.navigator.sendBeacon(window.PHOTON.config.URL, payload);
+        const blob = new window.Blob([JSON.stringify(data, null, 2)], {
+          type: 'application/json'
+        })
+        window.navigator.sendBeacon(window.PHOTON.config.URL, blob)
+        // Chrome 60 breaks blob headers in sendBeacon. Need fix. plaintext still works in chrome
+        // const payload = JSON.stringify(data, null, 2);
+        // window.navigator.sendBeacon(window.PHOTON.config.URL, payload);
+      } else {
+        // use fetch? will cancel on navigation unless in web worker
       }
     }
 
-  };
-
+  }
 
   // ADDITIONAL SELF-REFERENCING METHODS
   // --------------------------------------------------------------------------------
 
-  PHOTON.getData = function() {
-    // if object already exists, merge new data in without overwriting existing values
+  PHOTON.getData = () => {
+    // if object already exists, merge new data in without overwriting existing values per category
     PHOTON.data = PHOTON.data
-      ? Object.assign(PHOTON.gather(), PHOTON.data)
-      : PHOTON.gather();
+      ? Object.assign(PHOTON.data, PHOTON.gather())
+      : PHOTON.gather()
   }
 
-  PHOTON.addData = function(key, value) {
-    PHOTON.data[key] = value;
+  PHOTON.addData = (key, value) => {
+    PHOTON.data[key] = value
   }
 
-  PHOTON.config = (PHOTON && PHOTON_CONFIG)
-    ? Object.assign(PHOTON.defaultConfig, PHOTON_CONFIG)
+  PHOTON.config = (PHOTON && window.PHOTON_CONFIG)
+    ? Object.assign(PHOTON.defaultConfig, window.PHOTON_CONFIG)
     : PHOTON.defaultConfig
 
   // assign to window
-  window.PHOTON = PHOTON;
+  window.PHOTON = PHOTON
 
   // emit loaded event
-  const loadedEvent = new CustomEvent('PHOTONLoaded');
-  document.dispatchEvent(loadedEvent);
-
-})(window, document);
+  // const loadedEvent = new window.CustomEvent('PHOTONLoaded')
+  // document.dispatchEvent(loadedEvent)
+  // console.log('PHOTONLoaded')
+})(window, document, window.UserTimingCompression, window.ResourceTimingCompression, window.performance, window.LZString)
