@@ -1,8 +1,13 @@
 const gulp = require('gulp')
-const babel = require('gulp-babel')
+// const babel = require('gulp-babel')
+
+// es6 uglify
 const uglify = require('uglify-es')
 const composer = require('gulp-uglify/composer')
 const minify = composer(uglify, console)
+
+// es5 uglify
+// const minify = require('gulp-uglify')
 const rename = require('gulp-rename')
 
 const src = './src/*.js'
@@ -13,7 +18,7 @@ const renameConfig = (path) => {
 
 gulp.task('babel', () => {
   return gulp.src(src)
-    .pipe(babel())
+    // .pipe(babel())
     .pipe(minify())
     .pipe(rename(renameConfig))
     .pipe(gulp.dest(dest))
