@@ -30,9 +30,10 @@
       // gather timings
       data.timings = perf.timing
 
-      // first paint
-      if (window.chrome) {
-        data.firstPaint = window.chrome.loadTimes().firstPaintTime
+      // paint metrics
+      let paintMetrics = perf.getEntriesByType('paint');
+      if (paintMetrics) {
+        data.paintMetrics = paintMetrics;
       }
 
       // gather resources
@@ -50,10 +51,11 @@
       let data = PHOTON.data
       if (navigator.sendBeacon && data) {
         // Firefox still works. Use it until chrome fixes CORs bug with sendBeacon
-        let blob = new Blob([JSON.stringify(data, null, 2)], {
-          type: 'application/json'
-        })
-        navigator.sendBeacon(PHOTON.config.URL, blob)
+        // let blob = new Blob([JSON.stringify(data, null, 2)], {
+        //   type: 'application/json'
+        // })
+        let payload = JSON.stringify(data, null, 2)
+        navigator.sendBeacon(PHOTON.config.URL, payload)
       }
     }
 
